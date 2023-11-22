@@ -25,6 +25,10 @@ public class pedXRController : MonoBehaviour
     /// The angle to thurn when press thumbstick
     /// </summary>
     public float thurnAngle { get; set; }
+    [Header("Options")]
+    public bool canMove = true;
+    public bool canThurn = true;
+    public bool canJump = true;
 
 
     //Mono
@@ -42,54 +46,67 @@ public class pedXRController : MonoBehaviour
     {
         inputDir = (leftHand.Controller.GetAxis2D(WebXRController.Axis2DTypes.Thumbstick) + rightHand.Controller.GetAxis2D(WebXRController.Axis2DTypes.Thumbstick));
         moveDir = CameraManager.CurrentCam.transform.TransformDirection(new Vector3(inputDir.x, 0, inputDir.y));
-        ped.Move(moveDir, moveDir.magnitude);
 
-        if (leftHand.Controller.GetButtonDown(WebXRController.ButtonTypes.Thumbstick))
+        if (canMove)
         {
-            float v = leftHand.Controller.GetAxis2D(WebXRController.Axis2DTypes.Thumbstick).x;
-            if (Mathf.Abs(v) >= 0.4)
-            {
-                if (v > 0)
-                {
-                    thurnAngle += 90;
-                }
-                else
-                {
-                    thurnAngle -= 90;
-                }
-            } else
-            {
-                thurnAngle -= 90;
-            }
+            ped.Move(moveDir, moveDir.magnitude);
         }
-        if (rightHand.Controller.GetButtonDown(WebXRController.ButtonTypes.Thumbstick))
+
+        if (canThurn)
         {
-            float v = rightHand.Controller.GetAxis2D(WebXRController.Axis2DTypes.Thumbstick).x;
-            if (Mathf.Abs(v) >= 0.4)
+            if (leftHand.Controller.GetButtonDown(WebXRController.ButtonTypes.Thumbstick))
             {
-                if (v > 0)
+                float v = leftHand.Controller.GetAxis2D(WebXRController.Axis2DTypes.Thumbstick).x;
+                if (Mathf.Abs(v) >= 0.4)
                 {
-                    thurnAngle += 90;
+                    if (v > 0)
+                    {
+                        thurnAngle += 90;
+                    }
+                    else
+                    {
+                        thurnAngle -= 90;
+                    }
                 }
                 else
                 {
                     thurnAngle -= 90;
                 }
             }
-            else
+            if (rightHand.Controller.GetButtonDown(WebXRController.ButtonTypes.Thumbstick))
             {
-                thurnAngle += 90;
+                float v = rightHand.Controller.GetAxis2D(WebXRController.Axis2DTypes.Thumbstick).x;
+                if (Mathf.Abs(v) >= 0.4)
+                {
+                    if (v > 0)
+                    {
+                        thurnAngle += 90;
+                    }
+                    else
+                    {
+                        thurnAngle -= 90;
+                    }
+                }
+                else
+                {
+                    thurnAngle += 90;
+                }
+            }
+
+        }
+
+        if (canJump)
+        {
+            if (leftHand.Controller.GetButtonDown(WebXRController.ButtonTypes.ButtonA) ||
+                rightHand.Controller.GetButtonDown(WebXRController.ButtonTypes.ButtonA))
+            {
+                if (ped.isGrounded)
+                {
+                    ped.Jump();
+                }
             }
         }
 
-        if (leftHand.Controller.GetButtonDown(WebXRController.ButtonTypes.ButtonA) ||
-            rightHand.Controller.GetButtonDown(WebXRController.ButtonTypes.ButtonA))
-        {
-            if (ped.isGrounded)
-            {
-                ped.Jump();
-            }
-        }
 
         thurnAngle = Mathf.LerpAngle(thurnAngle, thurnAngle, 1);
     }
